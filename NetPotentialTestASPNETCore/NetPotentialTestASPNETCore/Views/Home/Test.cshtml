@@ -1,0 +1,108 @@
+﻿@model NetPotentialTestASPNETCore.Models.Element
+@{
+    Layout = null;
+    ViewBag.Title = "Test";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    </environment>
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    </environment>
+    <script>
+
+        // Calling of ordering functionality on page load
+        $(document).ready(function () {
+            order('LeftElements');
+            order('RightElements');
+        });
+
+        // Ascending order functionality for listbox
+        function order(controlId) {
+            // Getting options from the listbox to an array
+            var content = [];
+            $('#' + controlId).children().each(function (i, element) {
+                content.push($(element).val())
+            });
+
+            // bubble sorting algorithm
+            for (var i = content.length - 1; i >= 0; i--) {
+                //console.log('i');
+                for (var j = 1; j <= i; j++) {
+                    //console.log('j');
+                    //console.log(content[j-1] + ' > ' + content[j]);
+                    if (parseInt(content[j - 1]) > parseInt(content[j])) {
+                        //console.log('move');
+                        var temp = content[j - 1];
+                        content[j - 1] = content[j];
+                        content[j] = temp;
+                        //console.log(content);
+                    }
+                }
+            }
+
+            // Recreation of options in the listbox sorted
+            $('#' + controlId).empty();
+            for (var i = 0; i < content.length; i++) {
+                $('#' + controlId).append('<option value="' + content[i] + '">' + content[i] + '</option>');
+            }
+        }
+
+        // Validation at least 1 element selected before attemp to make the request
+        function validateSelected(control) {
+            var selected = $('#' + control + ' :selected').length;
+            if (selected > 0)
+                return true;
+            else
+                return false;
+        }
+    </script>
+</head>
+<body>
+    <h2>Test</h2>
+    <div class="container">
+        <div class="row">
+            1. Populate the left listbox with the numbers from 1 to 20
+        </div>
+        <div class="row">
+            2. Implement functionality to move the numbers selected in the left listbox when the button Right >> is clicked
+        </div>
+        <div class="row">
+            3. Validate at least one element will be selected from the left listbox before attempt to call the functionality made on point 2
+        </div>
+        <div class="row">
+            4. Implement the functionality made on 2. and 3. for the right listbox when the button << Left is clicked
+        </div>
+        <div class="row">
+            5. Implement in the client side the functionality to order ascendent the lists
+        </div>
+        <form>
+            <div class="row">
+                <div class="col-sm-2">
+                    @Html.ListBoxFor(x => x.SelectedLeftItems, Model.LeftElements, new { id = "LeftElements", style = "width:100%" })
+                    @Html.Hidden("Left", Model.LeftElementsNow == null ? "" : Newtonsoft.Json.JsonConvert.SerializeObject(Model.LeftElementsNow.ToArray()))
+                </div>
+                <div class="col-sm-2">
+                    @Html.ListBoxFor(x => x.SelectedRightItems, Model.RightElements, new { id = "RightElements", style = "width:100%" })
+                    @Html.Hidden("Right", Model.RightElementsNow == null ? "" : Newtonsoft.Json.JsonConvert.SerializeObject(Model.RightElementsNow.ToArray()))
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <Button id="btnToRight" type="submit" formaction="~/Home/ToRight" formmethod="post" onclick="return validateSelected('LeftElements');">Right >></Button>
+                </div>
+                <div class="col-sm-2">
+                    <Button id="btnToLeft" type="submit" formaction="~/Home/ToLeft" formmethod="post" onclick="return validateSelected('RightElements');"><< Left</Button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
